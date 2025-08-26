@@ -1,0 +1,21 @@
+import redis from "@/app/services/redis";
+
+export const setAccessToken = async (token: string, expiresIn: number = 60 * 60) => {
+    await redis.set('ms_oauth_access_token', token, {
+        ex: expiresIn - 600,
+    });
+};
+
+export const setRefreshToken = async (token: string, expiresIn: number = 30 * 24 * 60 * 60) => {
+    await redis.set('ms_oauth_refresh_token', token, {
+        ex: expiresIn,
+    });
+};
+
+export const getAccessToken = async () => {
+    return await redis.get('ms_oauth_access_token');
+};
+
+export const getRefreshToken = async () => {
+    return await redis.get('ms_oauth_refresh_token');
+};

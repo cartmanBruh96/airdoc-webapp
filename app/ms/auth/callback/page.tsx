@@ -8,7 +8,7 @@ type Email = {
   bodyPreview: string;
 }
 
-type Resp = {
+type GetEmailsResp = {
   data: Array<Email>;
 }
 
@@ -20,17 +20,25 @@ export default function Home() {
   const [emails, setEmails] = React.useState<Array<Email>>([]);
 
   const initAuthHandler = async (code: string) => {
-    const resp = await fetch('/api/ms/oauth/init', {
+    await fetch('/api/ms/oauth/init', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ code }),
     });
-    const data: Resp  = await resp.json();
-    console.log('Response from auth init:', data.data);
+  }
+
+  const getEmailsHandler = async () => {
+    const resp = await fetch('/api/ms/emails', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const data: GetEmailsResp = await resp.json();
     setEmails(data.data);
-}
+  }
 
   return (
     <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
@@ -40,27 +48,37 @@ export default function Home() {
         <div className="flex gap-4 items-center flex-col sm:flex-row">
           OAUTH Callback page
         </div>
-        <button
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          onClick={() => { initAuthHandler(code!) }}
-          disabled={!code}
-        >
-          Initialize Auth
-        </button>
+        <div className='grid grid-cols-3 gap-4'>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => { initAuthHandler(code!) }}
+            disabled={!code}
+          >
+            Initialize Auth
+          </button>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => { getEmailsHandler() }}
+          >
+            Get Emails
+          </button>
+          <button
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            onClick={() => { setEmails([]) }}
+          >
+            Clear Emails
+          </button>
+        </div>
         <div>
           <h2 className="text-lg font-semibold mb-4">Fetched Emails:</h2>
-          {emails.length === 0 ? (
-            <p>No emails fetched.</p>
-          ) : (
-            <ul className="space-y-4">
-              {emails.map((email) => (
-                <li key={email.id} className="border p-4 rounded shadow-sm">
-                  <h3 className="font-bold">{email.subject}</h3>
-                  <p>{email.bodyPreview}</p>
-                </li>
-              ))}
-            </ul>
-          )}
+          <ul className="space-y-4">
+            {emails.map((email) => (
+              <li key={email.id} className="border p-4 rounded shadow-sm">
+                <h3 className="font-bold">{email.subject}</h3>
+                <p>{email.bodyPreview}</p>
+              </li>
+            ))}
+          </ul>
         </div>
       </main>
     </div>
