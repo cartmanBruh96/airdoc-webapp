@@ -25,6 +25,7 @@ export async function GET() {
             },
         });
         const emailsResponseData: UserEmailsData = emailsResponse.data;
+        console.log('User emails:', emailsResponse.data);
         return NextResponse.json({ data: emailsResponseData.value });
     } catch (error) {
         console.error('Error fetching user emails:', error);

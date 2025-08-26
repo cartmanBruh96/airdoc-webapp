@@ -29,6 +29,15 @@ export default function Home() {
     });
   }
 
+  const initRefreshHandler = async () => {
+    await fetch('/api/ms/oauth/refresh', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
   const getEmailsHandler = async () => {
     const resp = await fetch('/api/ms/emails', {
       method: 'GET',
@@ -55,6 +64,12 @@ export default function Home() {
             disabled={!code}
           >
             Initialize Auth
+          </button>
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            onClick={() => { initRefreshHandler() }}
+          >
+            Refresh Token
           </button>
           <button
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"

@@ -12,10 +12,10 @@ export const setRefreshToken = async (token: string, expiresIn: number = 30 * 24
     });
 };
 
-export const getAccessToken = async () => {
+export const getAccessToken = async (): Promise<string | null> => {
     return await redis.get('ms_oauth_access_token');
 };
 
-export const getRefreshToken = async () => {
+export const getRefreshToken = async (): Promise<string | null> => {
     return await redis.get('ms_oauth_refresh_token');
 };
