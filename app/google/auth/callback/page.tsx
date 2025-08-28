@@ -1,0 +1,100 @@
+'use client';
+import { useSearchParams } from 'next/navigation';
+import React from 'react';
+
+type Email = {
+  id: string;
+  threadId: string;
+  labelIds: string[];
+  snippet: string;
+}
+
+type GetEmailsResp = {
+  data: Array<Email>;
+}
+
+export default function Home() {
+
+  const searchParams = useSearchParams();
+  const code = searchParams.get('code');
+  const [emails, setEmails] = React.useState<Array<Email>>([]);
+
+  const initAuthHandler = async (code: string) => {
+    await fetch('/api/google/oauth/init', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ code }),
+    });
+  }
+
+  const initRefreshHandler = async () => {
+    await fetch('/api/google/oauth/refresh', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+  }
+
+  const getEmailsHandler = async () => {
+    const resp = await fetch('/api/google/emails', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    const data: GetEmailsResp = await resp.json();
+    setEmails(data.data);
+  }
+
+  return (
+    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
+      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+        <p>CODE: {code}</p>
+        <div className="flex gap-4 items-center flex-col sm:flex-row">
+          Google OAUTH Callback page
+        </div>
+        <div className='grid grid-cols-3 gap-4'>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => { initAuthHandler(code!) }}
+            disabled={!code}
+          >
+            Initialize Auth
+          </button>
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+            onClick={() => { initRefreshHandler() }}
+          >
+            Refresh Token
+          </button>
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            onClick={() => { getEmailsHandler() }}
+          >
+            Get Emails
+          </button>
+          <button
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            onClick={() => { setEmails([]) }}
+          >
+            Clear Emails
+          </button>
+        </div>
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Fetched Emails:</h2>
+          <ul className="space-y-4">
+            {emails.map((email) => (
+              <li key={email.id} className="border p-4 rounded shadow-sm">
+                <h3 className="font-bold">{email.labelIds.join(', ')}</h3>
+                <p>{email.snippet}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </main>
+    </div>
+  );
+}
