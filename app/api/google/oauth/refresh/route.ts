@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-import { setAccessToken, setRefreshToken, getRefreshToken } from '@/app/services/googleOauthToken';
+import { readToken, setToken, TokenType } from '@/app/services/token';
+import { encrypt } from '@/app/services/encryptDecrypt';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID!;
 const CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET!;
@@ -19,7 +20,7 @@ type OAUTHV2TokenResponse = {
 // refresh token remains the same, and its extended for another 7 days
 export async function POST(request: Request) {
     try {
-        const refreshToken = await getRefreshToken();
+        const refreshToken = await readToken(TokenType.GOOGLE_OAUTH_REFRESH_TOKEN);
         if (!refreshToken) {
             // prompt user to re-authenticate
             return NextResponse.json({ error: 'No refresh token found' }, { status: 401 });
@@ -37,9 +38,7 @@ export async function POST(request: Request) {
             }
         );
         const data: OAUTHV2TokenResponse = tokenRefreshResponse.data;
-        console.log('Token refresh response:', data);
-        await setAccessToken(data.access_token);
-        // await setRefreshToken(data.refresh_token);
+        await setToken(TokenType.GOOGLE_OAUTH_ACCESS_TOKEN, data.access_token, data.expires_in);
         return NextResponse.json({ data: null });
     } catch (error) {
         console.error('Error exchanging code for token:', error);

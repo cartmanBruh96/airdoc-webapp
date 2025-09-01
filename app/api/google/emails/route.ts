@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
-
-import { getAccessToken } from '@/app/services/googleOauthToken';
+import { readToken, TokenType } from '@/app/services/token';
 
 const EMAIL_ENDPOINT = 'https://gmail.googleapis.com/gmail/v1/users/me/messages';
 
@@ -21,7 +20,7 @@ type DetailedEmailResponse = {
 
 export async function GET() {
     try {
-        const accessToken = await getAccessToken();
+        const accessToken = await readToken(TokenType.GOOGLE_OAUTH_ACCESS_TOKEN);
         if (!accessToken) {
             return NextResponse.json({ error: 'No access token found' }, { status: 401 });
         }

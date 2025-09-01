@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-import { getAccessToken } from '@/app/services/msOauthToken';
+import { readToken, TokenType } from '@/app/services/token';
 
 const GRAPH_EMAIL_ENDPOINT = 'https://graph.microsoft.com/v1.0/me/messages';
 
@@ -15,7 +15,7 @@ type UserEmailsData = {
 
 export async function GET() {
     try {
-        const accessToken = await getAccessToken();
+        const accessToken = await readToken(TokenType.MS_OAUTH_ACCESS_TOKEN);
         if (!accessToken) {
             return NextResponse.json({ error: 'No access token found' }, { status: 401 });
         }

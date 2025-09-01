@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
-
-import { setAccessToken, setRefreshToken } from "@/app/services/googleOauthToken";
+import { setToken, TokenType } from "@/app/services/token";
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID!;
 const CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET!;
@@ -34,8 +33,8 @@ export async function POST(request: Request) {
             }
         );
         const data: OAUTHV2TokenResponse = tokenResponse.data;
-        await setAccessToken(data.access_token, data.expires_in);
-        await setRefreshToken(data.refresh_token, data.refresh_token_expires_in);
+        await setToken(TokenType.GOOGLE_OAUTH_ACCESS_TOKEN, data.access_token, data.expires_in);
+        await setToken(TokenType.GOOGLE_OAUTH_REFRESH_TOKEN, data.refresh_token, data.refresh_token_expires_in);
         return NextResponse.json({ data: null });
     } catch (error: unknown) {
         console.error('Error exchanging code for token:', error);

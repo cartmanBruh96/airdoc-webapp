@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-import { setAccessToken, setRefreshToken } from "@/app/services/msOauthToken";
+import { TokenType, setToken } from '@/app/services/token';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_AZURE_CLIENT_ID!;
 const CLIENT_SECRET = process.env.AZURE_CLIENT_SECRET_VALUE!;
@@ -34,8 +34,8 @@ export async function POST(request: Request) {
         );
         const data: OAUTHV2TokenResponse = tokenResponse.data;
         const { access_token, refresh_token } = data;
-        await setAccessToken(access_token);
-        await setRefreshToken(refresh_token);
+        await setToken(TokenType.MS_OAUTH_ACCESS_TOKEN, access_token);
+        await setToken(TokenType.MS_OAUTH_REFRESH_TOKEN, refresh_token);
         return NextResponse.json({ data: null });
     } catch (error: unknown) {
         console.error('Error exchanging code for token:', error);

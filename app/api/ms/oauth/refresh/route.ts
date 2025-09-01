@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
 
-import { setAccessToken, setRefreshToken, getRefreshToken } from '@/app/services/msOauthToken';
+import { readToken, setToken, TokenType } from '@/app/services/token';
 
 const CLIENT_ID = process.env.NEXT_PUBLIC_AZURE_CLIENT_ID!;
 const CLIENT_SECRET = process.env.AZURE_CLIENT_SECRET_VALUE!;
@@ -17,7 +17,7 @@ type OAUTHV2TokenResponse = {
 
 export async function POST(request: Request) {
     try {
-        const refreshToken = await getRefreshToken();
+        const refreshToken = await readToken(TokenType.MS_OAUTH_REFRESH_TOKEN);
         if (!refreshToken) {
             // prompt user to re-authenticate
             return NextResponse.json({ error: 'No refresh token found' }, { status: 401 });
@@ -36,8 +36,8 @@ export async function POST(request: Request) {
         );
         const data: OAUTHV2TokenResponse = tokenRefreshResponse.data;
         console.log('Token refresh response:', data);
-        await setAccessToken(data.access_token);
-        await setRefreshToken(data.refresh_token);
+        await setToken(TokenType.MS_OAUTH_ACCESS_TOKEN, data.access_token);
+        await setToken(TokenType.MS_OAUTH_REFRESH_TOKEN, data.refresh_token);
         return NextResponse.json({ data: null });
     } catch (error) {
         console.error('Error exchanging code for token:', error);
