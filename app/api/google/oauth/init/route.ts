@@ -5,6 +5,7 @@ import { setToken, TokenType } from "@/app/services/token";
 const CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID!;
 const CLIENT_SECRET = process.env.GOOGLE_OAUTH_CLIENT_SECRET!;
 const OAUTH_CODE_EXCHANGE_URL = 'https://oauth2.googleapis.com/token';
+const OAUTH_USER_INFO_URL = 'https://www.googleapis.com/oauth2/v2/userinfo';
 
 type OAUTHV2TokenResponse = {
     token_type: string;
@@ -33,6 +34,17 @@ export async function POST(request: Request) {
             }
         );
         const data: OAUTHV2TokenResponse = tokenResponse.data;
+
+        // fetch user info
+        const userInfoResponse = await axios.get(OAUTH_USER_INFO_URL, {
+            headers: {
+                Authorization: `Bearer ${data.access_token}`,
+            },
+        });
+        const userInfo = userInfoResponse.data;
+        console.log('User Info:', userInfo);
+
+
         await setToken(TokenType.GOOGLE_OAUTH_ACCESS_TOKEN, data.access_token, data.expires_in);
         await setToken(TokenType.GOOGLE_OAUTH_REFRESH_TOKEN, data.refresh_token, data.refresh_token_expires_in);
         return NextResponse.json({ data: null });
