@@ -1,8 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { functions } from '@/config/firebase';
-import { httpsCallable } from 'firebase/functions';
+import axios from '@/config/axios';
 
 const OrganisationRegister = () => {
     const [userId, setUserId] = useState('');
@@ -18,12 +17,7 @@ const OrganisationRegister = () => {
             "businessType": businessType,
             "numberOfEmployees": numberOfEmployees,
         };
-        const apiFunction = httpsCallable(functions, 'api');
-        const result = await apiFunction({
-            path: '/v1/organisations/register',
-            method: 'POST',
-            data: payload
-        });
+        const result = await axios.post('/organisations/register', payload);
         console.log('Function result:', result.data);
     }
 
